@@ -5,18 +5,21 @@
 // Messwerte in Zentimetern
 const float MinMeasuredDistance = 5;
 const float MaxMeasuredDistance = 20;
+
 // Zisternenabstände in Metern
 const float MaxDistance = 4;
 const float MinDistance = 0;
 
-const int DefaultDelay = 1000; // 0,5 Sekunden Pause
+const int DefaultDelay = 1500; // 1,5 Sekunden Pause
 
 // Ultrachallsensor Pinbelegung
-const int trigPin = 8;
-const int echoPin = 9;
+#define trigPin 8
+#define echoPin 9
 
-const int LedPin = 7; //LED Pinbelegung
-const int MotorPin = 10; //Servo Pinbelegung
+#define ButtonPin 13
+bool showDistance = false;
+#define LedPin 7 //LED Pinbelegung
+#define MotorPin 10 //Servo Pinbelegung
 const Servo servoMain; 
 
 // LCD Pinbelegung definieren
@@ -27,7 +30,7 @@ void setup() {
  // Ultraschallsensor Pinmodus festlegen
  pinMode(trigPin, OUTPUT);
  pinMode(echoPin, INPUT);
-
+ pinMode(ButtonPin, INPUT_PULLUP);
  pinMode(LedPin, OUTPUT); //LED Pinmodus festlegen
  servoMain.attach(MotorPin); //Servo init
  
@@ -39,10 +42,18 @@ void setup() {
  lcd.setCursor(0, 1);
  lcd.print("Sensor-Messung");
 
- delay(1000); // 1 Sekunden Pause
+ delay(2000); // 1 Sekunden Pause
 }
 
 void loop() {
+ //Knopf überprüfen
+ if (digitalRead(ButtonPin) == 0){
+   showDistance = !showDistance;//Bei aktivierung Modus ändern
+   lcd.clear();
+   lcd.print("OK");//Anzeigen, dass Knopfdruck wahrgenommen wurde
+   while(digitalRead(ButtonPin) == 0); //Programm anhalten, solange Knopf gedrückt bleibt
+ }
+
  int filledPercent = filledInPercent(measureDistance()); //Füllstand in Prozent
   
  displayWaterlevel(filledPercent); //Anzeige des Wasserstands
@@ -82,24 +93,27 @@ int filledInPercent(float distance){
 void displayWaterlevel(int filledPercent){
  lcd.clear();
  lcd.setCursor(0, 0);
- lcd.print("Entf: ");
- lcd.print(distanceLeftToScale(filledPercent));
- lcd.print("m");
- lcd.setCursor(0, 1);
- lcd.print("Fuellstand: ");
- lcd.print(filledPercent);
- lcd.print("%");
+ if (showDistance){
+  lcd.print("Entfernung:");
+  lcd.setCursor(0, 1);
+  lcd.print(distanceLeftToScale(filledPercent));
+  lcd.print("m");
+ } else {
+  lcd.print("Fuellstand:");
+  lcd.setCursor(0, 1);
+  lcd.print(filledPercent);
+  lcd.print("%");
+ }
  delay(DefaultDelay);
 }
 
 //Warnung bei zu geringem Füllstand anzeigen
 void displayWarning(){
  lcd.clear();
- lcd.setCursor(0, 0);
+ lcd.setCursor(2, 0);
  lcd.print("!!!WARNUNG!!!");
  lcd.setCursor(0, 1);
- lcd.print("Fuellstand <=25%");
- lcd.print("%");
+ lcd.print("! Wenig Wasser !");
  digitalWrite(LedPin, HIGH);
 
  delay(DefaultDelay);
