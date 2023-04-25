@@ -109,9 +109,9 @@ void displayWarning(){
 //Schleuse öffnen/schließen
 void manageServo(int filledPercent){
   if(filledPercent > 75){
-    servoMain.write(90);
+    servoMain.write(0);
   }
   else if (filledPercent < 25){
-    servoMain.write(45);
+    servoMain.write(180);
   }
 }
