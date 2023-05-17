@@ -151,7 +151,7 @@ void writeSerial(int filledPercent){
   // Sensorwert und Zeitstempel an den Computer senden
   Serial.print(timestamp);
   Serial.print(",");
-  Serial.println(sensorValue);
+  Serial.println(filledPercent);
 }
 
 String getTimeStamp() {
