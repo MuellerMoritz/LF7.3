@@ -34,6 +34,9 @@ void setup() {
  pinMode(LedPin, OUTPUT); //LED Pinmodus festlegen
  servoMain.attach(MotorPin); //Servo init
  
+// Initialisierung der seriellen Kommunikation
+ Serial.begin(9600);
+
  //LCD Größe definieren
  lcd.begin(16, 2);
 
@@ -62,7 +65,9 @@ void loop() {
 
  if(filledPercent <= 25){
    displayWarning(); //Anzeige der Warnung
- } 
+ }
+
+ writeSerial(filledPercent);
 }
 
 //Entfernung des Ultraschallsensors messen
@@ -128,4 +133,39 @@ void manageServo(int filledPercent){
   else if (filledPercent < 25){
     servoMain.write(180);
   }
+}
+
+// Ausgabe des Füllstands via serial zur anbindung an csv/db mithilfe von zusatzprogrammen (z.B. PuTTY)
+void writeSerial(int filledPercent){
+  // Aktuelles Datum und Uhrzeit abrufen
+  String timestamp = getTimeStamp();
+
+  /* zweites mögliches ausgabeformat
+  // Sensorwert und Zeitstempel seriell ausgeben 
+  Serial.print("Füllstand: ");
+  Serial.println(filledPercent);
+  Serial.print("Zeitstempel: ");
+  Serial.println(timestamp);
+  */
+
+  // Sensorwert und Zeitstempel an den Computer senden
+  Serial.print(timestamp);
+  Serial.print(",");
+  Serial.println(sensorValue);
+}
+
+String getTimeStamp() {
+  // Aktuelle Zeit abrufen
+  unsigned long currentTime = millis();
+
+  // Zeit in das Format "TT.MM.JJJJ HH:MM:SS" umwandeln
+  String timestamp;
+  timestamp += String(day()) + ".";
+  timestamp += String(month()) + ".";
+  timestamp += String(year()) + " ";
+  timestamp += String(hour()) + ":";
+  timestamp += String(minute()) + ":";
+  timestamp += String(second());
+
+  return timestamp;
 }
